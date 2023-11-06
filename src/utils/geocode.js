@@ -1,18 +1,27 @@
 const request = require('request')
 
 const geocode = (address, callback) => {
-    const url = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + address +".json?access_token="+ process.env.GEOCODE_ACCESS_TOKEN + "&limit=1"
+    const url = "http://api.openweathermap.org/geo/1.0/direct?q=" + address + "&limit=1&appid=" + process.env.OPEN_WEATHER_API_KEY
 
     request({ url, json: true}, (error, {body}) => {
+        console.log(body)
         if (error) {
             callback("Unable to connect to location services!", undefined)
-        } else if (body.features.length === 0) {
+        } else if (body.length === 0) {
             callback("Unable to find location. Try another search.", undefined)
         } else {
+            let state = ""
+            if (body[0].state) {
+                state = ", " + body[0].state
+            }
+            let country = ""
+            if (body[0].country) {
+                country = ", " + body[0].country
+            }
             callback(undefined, {
-                longitude: body.features[0].center[0],
-                latitude: body.features[0].center[1],
-                location: body.features[0].place_name
+                longitude: body[0].lon,
+                latitude: body[0].lat,
+                location: body[0].name + state + country
             })
         }
     })
